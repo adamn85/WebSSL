@@ -9,6 +9,7 @@ Generates a cryptographic key pair inside a HSM. The private key is AES encrypte
 
 ```$algorithm``` **Type** String **Required** yes **Description** Algorithms (rsa-2048, rsa-4096, ecc-p256, rsa-p521).
 
+
 [x509SignCSR](https://www.webssl.io/?version=latest#8f4e4c7e-89fa-4e14-8f84-cfd15df0b0fb)
 Signs a Certifcate Signing Request (CSR) in the HSM and composes an x509 certificate.
 
@@ -22,6 +23,7 @@ Signs a Certifcate Signing Request (CSR) in the HSM and composes an x509 certifi
 
 ```$inKey``` **Type** String **Required** yes **Description** Signers key (PEM encoded encrypted private key) 
 
+
 [reqGenerateCSR](https://www.webssl.io/?version=latest#96541a80-bfd5-4567-9a3a-a4e51857f541)
 Generates a PKCS#10 Certificate Signing Request (CSR) within the HSM, by signing the applicants distinguished name fields with their private key.
 
@@ -30,6 +32,7 @@ Generates a PKCS#10 Certificate Signing Request (CSR) within the HSM, by signing
 ```$csrDigest``` **Type** String **Required** yes **Description** CSR digest (sha-256)
 
 ```$dn``` **Type** object **Required** yes **Description** CSR Distinguished names
+
 
 [reqGenKeyCert](https://www.webssl.io/?version=latest#a593b837-bff9-48d0-a870-975b49868237)
 Generates a key pair within the HSM and self signed certificate.
@@ -44,6 +47,7 @@ Generates a key pair within the HSM and self signed certificate.
 
 ```$dn``` **Type** object **Required** yes **Description** CSR Distinguished names
 
+
 [cmsSign](https://www.webssl.io/?version=latest#9a10b294-1cc2-487e-b87e-0b980bb3c321)
 Signs data within a HSM as CMS signed-data content, using the signers encrypted private key and certificate.
 
@@ -52,6 +56,7 @@ Signs data within a HSM as CMS signed-data content, using the signers encrypted 
 ```$signersKey``` **Type** String **Required** yes **Description** Signers key (PEM encoded encrypted private key)
 
 ```$signerCert``` **Type** object **Required** yes **Description** Signers Certificate (PEM encoded certificate)
+
 
 **CreatePKI.php**
 
