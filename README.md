@@ -2,7 +2,7 @@
 WebSSL is a cryptographic library built to run within a Hardware Security Module and provides a universally accessible interface.
 
 
-## WebSSL.class.php**
+## WebSSL.class.php
 
 ###### [genpkeyGenerateKey](https://www.webssl.io/?version=latest#49d95276-8806-463c-8063-a1e7c6f0d97b)
 
