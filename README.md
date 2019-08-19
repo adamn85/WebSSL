@@ -2,7 +2,7 @@
 WebSSL is a cryptographic library built to run within a Hardware Security Module and provides a universally accessible interface.
 
 
-## WebSSL.class.php
+## src/WebSSL.class.php
 
 ###### [genpkeyGenerateKey](https://www.webssl.io/?version=latest#49d95276-8806-463c-8063-a1e7c6f0d97b)
 
@@ -63,9 +63,18 @@ Signs data within a HSM as CMS signed-data content, using the signers encrypted 
 ```$signerCert``` **Type** object **Required** yes **Description** Signers Certificate (PEM encoded certificate)
 
 
-## CreatePKI.php
+## samples/create_pki.php
+
+###### PHP sample for creating a Public Key Infrastructure
 
 1. Create the Certificate Authority
 2. Create the User's key
 3. Create the User's Certificate Signing Request
 4. Have the Certificate Authority sign the User's Certificate Signing Request
+
+
+## samples/send_mail.php
+
+###### PHP sample for sending a signed or encrypted email
+
+
