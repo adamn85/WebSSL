@@ -9,12 +9,19 @@ The extended class provides S/MIME signed an encrypted emailing functionality.
 Sample code demonstrating how to use the SecurePHPMailer class. 
 
 ## WebSSL.class.php
-This class handles the composition and transfer of HTTP-JSON requests and responses to the WebSSL.io API.
+This class handles the composition and transfer of HTTP-JSON requests and responses to a remote HSM. 
+The HSM provide a HTTP API. See: [WebSSL.io](https://www.webssl.io)
 PHP's Client URL Library (libcurl) is required. (https://www.php.net/manual/en/book.curl.php)
 
 ## create_pki.php
 Sample code for creating a Keys and Certificates and setting up your own development Public Key Infrastructure.
 
+
+
+
+
+
+## WebSSL Class Function Overview
 
 ###### [genpkeyGenerateKey](https://www.webssl.io/?version=latest#49d95276-8806-463c-8063-a1e7c6f0d97b)
 
@@ -75,14 +82,6 @@ Signs data within a HSM as CMS signed-data content, using the signers encrypted 
 ```$signerCert``` **Type** object **Required** yes **Description** Signers Certificate (PEM encoded certificate)
 
 
-## samples/create_pki.php
-
-###### PHP sample for creating a Public Key Infrastructure
-
-1. Create the Certificate Authority
-2. Create the User's key
-3. Create the User's Certificate Signing Request
-4. Have the Certificate Authority sign the User's Certificate Signing Request
 
 
 
