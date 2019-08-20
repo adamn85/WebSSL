@@ -1,5 +1,5 @@
-# PHP Class for WebSSL with samples
-WebSSL is a cryptographic library built to run within a Hardware Security Module and provides a universally accessible interface.
+# A collection of PHP classes for utilising WebSSL.io
+WebSSL.io is a cryptographic library built to run within a Hardware Security Module(HSM) with a universally accessible HTTP interface.
 
 
 ## src/WebSSL.class.php
