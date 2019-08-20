@@ -8,8 +8,6 @@ require '../PHPMailer/PHPMailer.php';
 require '../PHPMailer/SMTP.php';
 require 'WebSSL.class.php';
 
-assert_options(ASSERT_ACTIVE, 1);
-
 
 /**
  * SecurePHPMailer class
