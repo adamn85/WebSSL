@@ -34,11 +34,11 @@ class SecurePHPMailer extends PHPMailer
 	 */
 	public function __construct($sendersCertPath, $sendersKeyPath) 
 	{
-        $this->webSSL = new WebSSL();
-        $this->sendersCertificate = file_get_contents($sendersCertPath, FILE_USE_INCLUDE_PATH);
-        $this->sendersKey = file_get_contents($sendersKeyPath, FILE_USE_INCLUDE_PATH);
-        parent::__construct();
-    }
+		$this->webSSL = new WebSSL();
+		$this->sendersCertificate = file_get_contents($sendersCertPath, FILE_USE_INCLUDE_PATH);
+		$this->sendersKey = file_get_contents($sendersKeyPath, FILE_USE_INCLUDE_PATH);
+		parent::__construct();
+    	}
 
 	private function composeSignedEmail()
 	{
@@ -89,8 +89,7 @@ class SecurePHPMailer extends PHPMailer
 		$cms = $this->webSSL->cmsEncrypt($emailParts[1], $recipientCertificate);
 
 		// Compose new SMIME Body
-		$this->MIMEBody = $cms . "\r\n";
-		
+		$this->MIMEBody = $cms . "\r\n";	
 	}
 
 	public function sendSignedEmail()
