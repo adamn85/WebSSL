@@ -3,6 +3,7 @@
  * 	PHP class for WebSSL
  *	WebSSL is a cryptographic library built to run within a Hardware Security Module and provides a universally accessible interface.
  */
+class WebSSLException extends Exception { }
  
 class WebSSL {
 
@@ -34,6 +35,11 @@ class WebSSL {
 		 
 		//Execute the request
 		$result = curl_exec($ch);
+		if(!$result) throw new WebSSLException('Curl Error: ' . curl_error($ch));
+
+		//Get last HTTP status code
+		$http_code = curl_getinfo( $ch, CURLINFO_HTTP_CODE );
+		if($http_code != "200" ) throw new WebSSLException('HTTP Response: ' . $http_code);
 		
 		//Decode the JSON array
 		$resultDecode = json_decode($result, true);

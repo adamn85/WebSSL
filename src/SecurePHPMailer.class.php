@@ -8,6 +8,9 @@ require '../PHPMailer/PHPMailer.php';
 require '../PHPMailer/SMTP.php';
 require 'WebSSL.class.php';
 
+assert_options(ASSERT_ACTIVE, 1);
+
+
 /**
  * SecurePHPMailer class
  * 
@@ -46,7 +49,8 @@ class SecurePHPMailer extends PHPMailer
 		$boundary = $this->generateId();
 
 		// Split original email 
-		$emailParts = explode("MIME-Version: 1.0\r\n", $this->getSentMimeMessage());
+		$emailParts = explode("MIME-Version: 1.0\r\n", $this->getSentMimeMessage(), 2);
+		if (count($emailParts) != 2) throw new Exception("Unable to split Email Header from Footer.");
 
 		// Compose new SMIME Header
 		$this->MIMEHeader = $emailParts[0] .
@@ -77,6 +81,7 @@ class SecurePHPMailer extends PHPMailer
 		
 		// Split original email 
 		$emailParts = explode("MIME-Version: 1.0\r\n", $this->getSentMimeMessage());
+		if (count($emailParts) != 2) throw new Exception("Unable to split Email Header from Footer.");
 
 		// Compose new SMIME Header
 		$this->MIMEHeader = $emailParts[0] .
@@ -86,7 +91,7 @@ class SecurePHPMailer extends PHPMailer
 			"Content-Disposition: attachment; filename=smime.p7m\r\n\r\n";
 
 		// Send email body to WebSSL.io. Returns PKCS#7/CMS EnvelopedData 
-		$cms = $this->webSSL->cmsEncrypt($emailParts[1], $recipientCertificate);
+		$cms = $this->webSSL->cmsEncrypt($emailParts[1], $recipientCertificate, 2);
 
 		// Compose new SMIME Body
 		$this->MIMEBody = $cms . "\r\n";	
