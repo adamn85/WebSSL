@@ -6,12 +6,12 @@
  
 class WebSSL {
 
-	private $debug = true;
+	public $debug = true;
 	 /**
 	 * Send curl request and return
 	 */
 	
-	function send($url, array $jsonData) {
+	protected function send($url, array $jsonData) {
 		
 		//Initiate cURL.
 		$ch = curl_init($url);
@@ -48,7 +48,7 @@ class WebSSL {
 	 * $algorithm -- Type: String Required: yes Description: Algorithms (rsa-2048, rsa-4096, ecc-p256, rsa-p521).
 	 */
 	 
-	function genpkeyGenerateKey($algorithm) {
+	public function genpkeyGenerateKey($algorithm) {
 		
 		$url = "https://c1.cloudhsms.com/genpkey";
 		 
@@ -75,7 +75,7 @@ class WebSSL {
 	 * $inKey -- Type: String Required: yes Description: Signers key (PEM encoded encrypted private key)
 	 */
 	 
-	function x509SignCSR($days,$digest,$csr,$signerCert,$inKey) {
+	public function x509SignCSR($days,$digest,$csr,$signerCert,$inKey) {
 		
 		$url = "https://c1.cloudhsms.com/x509/signCsr";
 		 
@@ -105,7 +105,7 @@ class WebSSL {
 	 * $dn -- Type: object Required: yes Description: CSR Distinguished names
 	 */
 	 
-	function reqGenerateCSR($inKey, $csrDigest, $dn) {
+	public function reqGenerateCSR($inKey, $csrDigest, $dn) {
 		
 		$url = "https://c1.cloudhsms.com/req/generateCsr";
 		 
@@ -136,7 +136,7 @@ class WebSSL {
 	 * $dn -- Type: object Required: yes Description: CSR Distinguished names
 	 */
 	 
-	function reqGenKeyCert($algorithm, $certDays, $csrDigest, $certSubjectType, $dn) {
+	public function reqGenKeyCert($algorithm, $certDays, $csrDigest, $certSubjectType, $dn) {
 		
 		$url = "https://c1.cloudhsms.com/req/generateKeyCert";
 		 
@@ -167,7 +167,7 @@ class WebSSL {
 	 * $signerCert -- Type: object Required: yes Description: Signers Certificate (PEM encoded certificate)
 	 */
 	 
-	function cmsSign($data, $signersKey, $signerCert) {
+	public function cmsSign($data, $signersKey, $signerCert) {
 		
 		//Initiate cURL.
 		$url = "https://c1.cloudhsms.com/cms/sign";
@@ -199,7 +199,7 @@ class WebSSL {
 	 * @param string $recipientCert a PEM encoded certificate used to encrypt 
 	 * @return string a encoded PKCS#7/CMS envelopedData 
 	 */
-	function cmsEncrypt($data, $recipientCert) {
+	public function cmsEncrypt($data, $recipientCert) {
 		
 		//Set the URL.
 		$url = "https://c1.cloudhsms.com/cms/encrypt";
@@ -230,7 +230,7 @@ class WebSSL {
 	 * @param string $recipientCert a PEM encoded certificate used to encrypt 
 	 * @return string a encoded PKCS#7/CMS envelopedData 
 	 */
-	function cmsSignAndEncrypt($data, $signersKey, $signerCert, $recipientCert) {
+	public function cmsSignAndEncrypt($data, $signersKey, $signerCert, $recipientCert) {
 		
 		//Set the URL.
 		$url = "https://c1.cloudhsms.com/cms/signEncrypt";
