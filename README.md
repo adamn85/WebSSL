@@ -1,5 +1,5 @@
 # A collection of PHP classes for utilising WebSSL.io
-WebSSL.io is a cryptographic library built to run within a Hardware Security Module(HSM) with a universally accessible HTTP interface.
+WebSSL.io is a HTTP accessible Hardware Security Module(HSM) with a variety of cryptographic functions.
 
 
 ## src/WebSSL.class.php
