@@ -1,4 +1,5 @@
 <?php
+
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
@@ -7,14 +8,30 @@ require '../PHPMailer/PHPMailer.php';
 require '../PHPMailer/SMTP.php';
 require 'WebSSL.class.php';
 
-/*
-*/
+/**
+ * SecurePHPMailer class
+ * 
+ * This class extends the functionality of PHPMailer's PHPMailer class.
+ * @see       https://github.com/PHPMailer/PHPMailer/ - The PHPMailer GitHub project.
+ * 
+ * The extended class provides S/MIME signed an encrypted emailing functionality. 
+ * SecurePHPMailer utilises a remote Hardware-Secure-Module (HSM)
+ * @see       https://www.webssl.io - The HTTP HSM
+ *
+ */
 class SecurePHPMailer extends PHPMailer
 {
 	private $webSSL;
 	private $sendersCertificate;
 	private $sendersEncryptedKey;
 
+	/**
+	 * SecurePHPMailer Constructor
+	 *
+	 * @param 	string 	$sendersCertPath 	The file path to a PEM encoded X.509 Certificate file
+	 * @param 	string 	$sendersKeyPath 	The file path to a PEM encoded Encrypted/Plain PKCS#8 key file. 
+	 * @return 	object 
+	 */
 	public function __construct($sendersCertPath, $sendersKeyPath) 
 	{
         $this->webSSL = new WebSSL();
@@ -23,13 +40,10 @@ class SecurePHPMailer extends PHPMailer
         parent::__construct();
     }
 
-	public function sendSignedEmail()
+	private function composeSignedEmail()
 	{
 		// Create new MIME boundary
 		$boundary = $this->generateId();
-
-		// Get PHPMailers composed Email prior to sending
-		$this->preSend();
 
 		// Split original email 
 		$emailParts = explode("MIME-Version: 1.0\r\n", $this->getSentMimeMessage());
@@ -54,19 +68,13 @@ class SecurePHPMailer extends PHPMailer
 			"Content-Description: S/MIME Cryptographic Signature\r\n" .
 			$cms . "\r\n" .
 			"------$boundary--\r\n";
-		
-		// Send newly constructed Email
-		$this->postSend();
 	}
 
-	public function sendEncryptedEmail($recipientCertPath)
+	private function composeEncryptedEmail($recipientCertPath)
 	{
 		// Open PEM Certificate 
 		$recipientCertificate = file_get_contents($recipientCertPath, FILE_USE_INCLUDE_PATH);
 		
-		// Get PHPMailers composed Email prior to sending
-		$this->preSend();
-
 		// Split original email 
 		$emailParts = explode("MIME-Version: 1.0\r\n", $this->getSentMimeMessage());
 
@@ -83,36 +91,27 @@ class SecurePHPMailer extends PHPMailer
 		// Compose new SMIME Body
 		$this->MIMEBody = $cms . "\r\n";
 		
-		// Send newly constructed Email
+	}
+
+	public function sendSignedEmail()
+	{
+		$this->preSend();
+		$this->composeSignedEmail();
+		$this->postSend();
+	}
+
+	public function sendEncryptedEmail($recipientCertPath)
+	{
+		$this->preSend();
+		$this->composeEncryptedEmail($recipientCertPath);
 		$this->postSend();
 	}
 
 	public function sendSignedAndEncryptedEmail($recipientCertPath)
 	{
-		// Open PEM Certificate 
-		$recipientCertificate = file_get_contents($recipientCertPath, FILE_USE_INCLUDE_PATH);
-		
-		// Get PHPMailers composed Email prior to sending
 		$this->preSend();
-
-		// Split original email 
-		$emailParts = explode("MIME-Version: 1.0\r\n", $this->getSentMimeMessage());
-
-		// Compose new SMIME Header
-		$this->MIMEHeader = $emailParts[0] .
-			"MIME-Version: 1.0\r\n" .
-			"Content-Type: application/pkcs7-mime; smime-type=enveloped-data; name=smime.p7m\r\n" .
-			"Content-Transfer-Encoding: base64\r\n" . 
-			"Content-Disposition: attachment; filename=smime.p7m\r\n\r\n";
-
-		// Send email body to WebSSL.io. Returns PKCS#7/CMS EnvelopedData 
-		$cms = $this->webSSL->cmsSignAndEncrypt($emailParts[1], $this->sendersKey, $this->sendersCertificate, $recipientCertificate);
-
-		// Compose new SMIME Body
-		$this->MIMEBody = $cms . "\r\n";
-		
-		// Send newly constructed Email
+		$this->composeSignedEmail();
+		$this->composeEncryptedEmail($recipientCertPath);
 		$this->postSend();
 	}
-
 }
