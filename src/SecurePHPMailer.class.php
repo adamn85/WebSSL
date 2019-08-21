@@ -45,7 +45,7 @@ class SecurePHPMailer extends PHPMailer
 		try {
 			$this->webSSL->getHsmInfo();
 			return true;
-		}  catch (Exception $e) {
+		}  catch (WebSSLException $e) {
 			return false;
 		}
 	}
