@@ -2,7 +2,7 @@
 WebSSL.io is a HTTP accessible Hardware Security Module(HSM) with a variety of cryptographic functions.
 
 ## SecurePHPMailer.class.php
-This class extends the functionality of PHPMailer project's PHPMailer class.
+This class extends the functionality of PHPMailer project's PHPMailer class. (https://github.com/PHPMailer/PHPMailer/)
 The extended class provides S/MIME signed an encrypted emailing functionality. 
 
 ## send_mail.php
@@ -10,8 +10,12 @@ Sample code demonstrating how to use the SecurePHPMailer class.
 
 ## WebSSL.class.php
 This class handles the composition and transfer of HTTP-JSON requests and responses to a remote HSM. 
-The HSM provide a HTTP API. See: [WebSSL.io](https://www.webssl.io)
-PHP's Client URL Library (libcurl) is required. (https://www.php.net/manual/en/book.curl.php)
+The remote HSM provides a HTTP API. 
+See: 
+-[WebSSL.io](https://www.webssl.io)
+This class requires PHP's Client URL Library.
+see:
+- [libcurl](https://www.php.net/manual/en/book.curl.php)
 
 ## create_pki.php
 Sample code for creating a Keys and Certificates and setting up your own development Public Key Infrastructure.
@@ -21,65 +25,7 @@ Sample code for creating a Keys and Certificates and setting up your own develop
 
 
 
-## WebSSL Class Function Overview
 
-###### [genpkeyGenerateKey](https://www.webssl.io/?version=latest#49d95276-8806-463c-8063-a1e7c6f0d97b)
-
-Generates a cryptographic key pair inside a HSM. The private key is AES encrypted by a HSM and returned in a PEM encoded encrypted private key structure. The public key is returned PEM encoded.
-
-```$algorithm``` **Type** String **Required** yes **Description** Algorithms (rsa-2048, rsa-4096, ecc-p256, rsa-p521).
-
-
-###### [x509SignCSR](https://www.webssl.io/?version=latest#8f4e4c7e-89fa-4e14-8f84-cfd15df0b0fb)
-
-Signs a Certifcate Signing Request (CSR) in the HSM and composes an x509 certificate.
-
-```$days``` **Type** String **Required** yes **Description** The number of days the certificate will be valid for.
-
-```$digest``` **Type** String **Required** yes **Description** CSR digest (sha-256)
-
-```$csr``` **Type** String **Required** yes **Description** Certificate Signing Request (PEM encoded) 
-
-```$signerCert``` **Type** String **Required** yes **Description** Signers x509 certficate (PEM encoded)
-
-```$inKey``` **Type** String **Required** yes **Description** Signers key (PEM encoded encrypted private key) 
-
-
-###### [reqGenerateCSR](https://www.webssl.io/?version=latest#96541a80-bfd5-4567-9a3a-a4e51857f541)
-
-Generates a PKCS#10 Certificate Signing Request (CSR) within the HSM, by signing the applicants distinguished name fields with their private key.
-
-```$inKey``` **Type** String **Required** yes **Description** Signers key (PEM encoded encrypted private key)
-
-```$csrDigest``` **Type** String **Required** yes **Description** CSR digest (sha-256)
-
-```$dn``` **Type** object **Required** yes **Description** CSR Distinguished names
-
-
-###### [reqGenKeyCert](https://www.webssl.io/?version=latest#a593b837-bff9-48d0-a870-975b49868237)
-
-Generates a key pair within the HSM and self signed certificate.
-
-```$algorithm``` **Type** String **Required** yes **Description** Algorithms (rsa-2048, rsa-4096, ecc-p256, ecc-p521).
-
-```$certDays``` **Type** String **Required** yes **Description** The number of days the certificate will be valid for.
-
-```$csrDigest``` **Type** object **Required** yes **Description** CSR digest (sha-256)
-
-```$certSubjectType``` **Type** String **Required** yes **Description** Certificate subject type (CA, End Entity)
-
-```$dn``` **Type** object **Required** yes **Description** CSR Distinguished names
-
-
-###### [cmsSign](https://www.webssl.io/?version=latest#9a10b294-1cc2-487e-b87e-0b980bb3c321)
-
-Signs data within a HSM as CMS signed-data content, using the signers encrypted private key and certificate.
-
-```$data``` **Type** String **Required** yes **Description**  Data to sign (Base64 encoded)
-
-```$signersKey``` **Type** String **Required** yes **Description** Signers key (PEM encoded encrypted private key)
-
-```$signerCert``` **Type** object **Required** yes **Description** Signers Certificate (PEM encoded certificate)
 
 
 
