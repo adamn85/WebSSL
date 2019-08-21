@@ -35,11 +35,20 @@ class SecurePHPMailer extends PHPMailer
 	 */
 	public function __construct($sendersCertPath, $sendersKeyPath) 
 	{
-		$this->webSSL = new WebSSL();
+		$this->webSSL = new WebSSL("https://c1.cloudhsms.com");
 		$this->sendersCertificate = file_get_contents($sendersCertPath, FILE_USE_INCLUDE_PATH);
 		$this->sendersKey = file_get_contents($sendersKeyPath, FILE_USE_INCLUDE_PATH);
 		parent::__construct();
-    	}
+	}
+
+	public function testHsmConnection() {
+		try {
+			$this->webSSL->getHsmInfo();
+			return true;
+		}  catch (Exception $e) {
+			return false;
+		}
+	}
 
 	private function composeSignedEmail()
 	{

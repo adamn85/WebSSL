@@ -7,44 +7,86 @@ class WebSSLException extends Exception { }
  
 class WebSSL {
 
-	public $debug = true;
-	 /**
+	public $debug = false;
+
+	private $hsmAddress = "https://c1.cloudhsms.com/"; 
+
+	public function __construct($hsmAddress) {
+		if (!filter_var($hsmAddress, FILTER_VALIDATE_URL)) throw new WebSSLException('Invalid HSM Address: ' . $hsmAddress);
+		$this->hsmAddress = $hsmAddress;
+	}
+	
+	/**
 	 * Send curl request and return
 	 */
-	
 	protected function send($url, array $jsonData) {
 		
+		if($this->debug) error_log("URL: " . $url);
+
 		//Initiate cURL.
 		$ch = curl_init($url);
-		
-		//Encode the array into JSON.
-		$jsonDataEncoded = json_encode($jsonData, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_LINE_TERMINATORS);
-		$jsonDataEncoded = str_replace(array("\\n", "\\r\n"), "\n", $jsonDataEncoded);
 
-		if($this->debug) error_log("Debug: JSON Request: " . $jsonDataEncoded);
-		 
-		//Tell cURL that we want to send a POST request.
-		curl_setopt($ch, CURLOPT_POST, 1);
-		 
-		//Attach our encoded JSON string to the POST fields.
-		curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonDataEncoded);
-		 
-		//Set the content type to application/json
-		curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json')); 
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		if(!empty($jsonData)) {
+			//Encode the array into JSON.
+			$jsonDataEncoded = json_encode($jsonData, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_LINE_TERMINATORS);
+			$jsonDataEncoded = str_replace(array("\\n", "\\r\n"), "\n", $jsonDataEncoded);
+
+			if($this->debug) error_log("Debug: JSON Request: " . $jsonDataEncoded);
+			 
+			curl_setopt_array($ch, array(
+				CURLOPT_RETURNTRANSFER => true,
+				CURLOPT_ENCODING => "",
+				CURLOPT_MAXREDIRS => 10,
+				CURLOPT_TIMEOUT => 0,
+				CURLOPT_FOLLOWLOCATION => false,
+				CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+				CURLOPT_CUSTOMREQUEST => "POST",
+				CURLOPT_POSTFIELDS => $jsonDataEncoded,
+				CURLOPT_HTTPHEADER => array(
+					"Content-Type: application/json"
+				),
+			));
+		} else {
+			curl_setopt_array($ch, array(
+				CURLOPT_RETURNTRANSFER => true,
+				CURLOPT_ENCODING => "",
+				CURLOPT_MAXREDIRS => 10,
+				CURLOPT_TIMEOUT => 0,
+				CURLOPT_FOLLOWLOCATION => false,
+				CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+				CURLOPT_CUSTOMREQUEST => "GET",
+			));
+		}
 		 
 		//Execute the request
-		$result = curl_exec($ch);
-		if(!$result) throw new WebSSLException('Curl Error: ' . curl_error($ch));
+		$response 	= curl_exec($ch);
+		$err 		= curl_error($ch);
+		if($err) throw new WebSSLException('Curl Error: ' . $err);
+		if(!$response) throw new WebSSLException('Empty Response.');
 
 		//Get last HTTP status code
 		$http_code = curl_getinfo( $ch, CURLINFO_HTTP_CODE );
 		if($http_code != "200" ) throw new WebSSLException('HTTP Response: ' . $http_code);
 		
-		//Decode the JSON array
-		$resultDecode = json_decode($result, true);
+		// Close channel
+		curl_close($ch);
 
-		return $resultDecode;
+		//Decode the JSON array
+		$result = json_decode($response, true);
+
+		return $result;
+	}
+
+	public function getHsmInfo() {
+
+		$url = $this->hsmAddress . "/hsm/info";
+
+		$result = $this->send($url, array());
+
+		if(!array_key_exists("id", $result)) throw new WebSSLException('Missing Key in JSON Response.');
+		if(!array_key_exists("type", $result)) throw new WebSSLException('Missing Key in JSON Response.');
+		
+		return $result;
 	}
 	
 	 /**
@@ -53,22 +95,21 @@ class WebSSL {
 	 *
 	 * $algorithm -- Type: String Required: yes Description: Algorithms (rsa-2048, rsa-4096, ecc-p256, rsa-p521).
 	 */
-	 
 	public function genpkeyGenerateKey($algorithm) {
 		
-		$url = "https://c1.cloudhsms.com/genpkey";
+		$url = $this->hsmAddress . "/genpkey";
 		 
 		//The JSON data.
 		$jsonData = array(
 			'algorithm' => $algorithm
 		);
 		
-		$resultDecode = $this->send($url, $jsonData);
-		 
-		$privateKey = $resultDecode['privateKey'];
-		$publicKey = $resultDecode['publicKey'];
+		$result = $this->send($url, $jsonData);
+
+		if(!array_key_exists("privateKey", $result)) throw new WebSSLException('Missing Key in JSON Response.');
+		if(!array_key_exists("publicKey", $result)) throw new WebSSLException('Missing Key in JSON Response.');
 		
-		return array($privateKey,$publicKey);
+		return $result;
 	}
 	
 	 /**
@@ -83,7 +124,7 @@ class WebSSL {
 	 
 	public function x509SignCSR($days,$digest,$csr,$signerCert,$inKey) {
 		
-		$url = "https://c1.cloudhsms.com/x509/signCsr";
+		$url = $this->hsmAddress . "/x509/signCsr";
 		 
 		//The JSON data.
 		$jsonData = array(
@@ -95,9 +136,11 @@ class WebSSL {
 			
 		);
 
-		$resultDecode = $this->send($url, $jsonData);
+		$result = $this->send($url, $jsonData);
+
+		if(!array_key_exists("certificate", $result)) throw new WebSSLException('Missing Key in JSON Response.');
 		
-		$certificate = $resultDecode['certificate'];
+		$certificate = $result['certificate'];
 		
 		return $certificate;
 	}
@@ -113,7 +156,7 @@ class WebSSL {
 	 
 	public function reqGenerateCSR($inKey, $csrDigest, $dn) {
 		
-		$url = "https://c1.cloudhsms.com/req/generateCsr";
+		$url = $this->hsmAddress . "/req/generateCsr";
 		 
 		//The JSON data.
 		$jsonData = array(
@@ -124,9 +167,11 @@ class WebSSL {
 			
 		);
 		 
-		$resultDecode = $this->send($url, $jsonData);
+		$result = $this->send($url, $jsonData);
+
+		if(!array_key_exists("csr", $result)) throw new WebSSLException('Missing Key in JSON Response.');
 		 
-		$csr = $resultDecode['csr'];
+		$csr = $result['csr'];
 
 		return $csr;
 
@@ -144,7 +189,7 @@ class WebSSL {
 	 
 	public function reqGenKeyCert($algorithm, $certDays, $csrDigest, $certSubjectType, $dn) {
 		
-		$url = "https://c1.cloudhsms.com/req/generateKeyCert";
+		$url = $this->hsmAddress . "/req/generateKeyCert";
 		 
 		//The JSON data.
 		$jsonData = array(
@@ -155,13 +200,15 @@ class WebSSL {
 			'distinguishedNames' => $dn
 		);
 		 
-		$resultDecode = $this->send($url, $jsonData);
-		 
-		$privateKey = $resultDecode['privateKey'];
-		$certificate = $resultDecode['certificate'];
-		
+		$result = $this->send($url, $jsonData);
 
-		return array($privateKey,$certificate);
+		if(!array_key_exists("privateKey", $result)) throw new WebSSLException('Missing Key in JSON Response.');
+		if(!array_key_exists("certificate", $result)) throw new WebSSLException('Missing Key in JSON Response.');
+		 
+		$privateKey = $result['privateKey'];
+		$certificate = $result['certificate'];
+		
+		return $result;
 
 	}
 	
@@ -176,7 +223,7 @@ class WebSSL {
 	public function cmsSign($data, $signersKey, $signerCert) {
 		
 		//Initiate cURL.
-		$url = "https://c1.cloudhsms.com/cms/sign";
+		$url = $this->hsmAddress . "/cms/sign";
 		 
 		//The JSON data.
 		$jsonRequest = array(
@@ -185,9 +232,11 @@ class WebSSL {
 			'in' => base64_encode($data)
 		);
 		 
-		$jsonResult = $this->send($url, $jsonRequest);
+		$result = $this->send($url, $jsonRequest);
+
+		if(!array_key_exists("cms", $result)) throw new WebSSLException('Missing Key in JSON Response.');
 		 
-		$cms = $jsonResult['cms'];
+		$cms = $result['cms'];
 
 		//Remove CMS Header
 		$cms = str_replace('-----BEGIN CMS-----', '', $cms);
@@ -208,7 +257,7 @@ class WebSSL {
 	public function cmsEncrypt($data, $recipientCert) {
 		
 		//Set the URL.
-		$url = "https://c1.cloudhsms.com/cms/encrypt";
+		$url = $this->hsmAddress . "/cms/encrypt";
 		 
 		//The JSON data.
 		$jsonRequest = array(
@@ -216,9 +265,11 @@ class WebSSL {
 			'in' => base64_encode($data)
 		);
 		 
-		$jsonResult = $this->send($url, $jsonRequest);
+		$result = $this->send($url, $jsonRequest);
+
+		if(!array_key_exists("cms", $result)) throw new WebSSLException('Missing Key in JSON Response.');
 		 
-		$cms = $jsonResult['cms'];
+		$cms = $result['cms'];
 
 		//Remove CMS Header
 		$cms = str_replace('-----BEGIN CMS-----', '', $cms);
@@ -239,7 +290,7 @@ class WebSSL {
 	public function cmsSignAndEncrypt($data, $signersKey, $signerCert, $recipientCert) {
 		
 		//Set the URL.
-		$url = "https://c1.cloudhsms.com/cms/signEncrypt";
+		$url = $this->hsmAddress . "/cms/signEncrypt";
 		 
 		//The JSON data.
 		$jsonRequest = array(
@@ -249,9 +300,11 @@ class WebSSL {
 			'in' => base64_encode($data)
 		);
 		 
-		$jsonResult = $this->send($url, $jsonRequest);
+		$result = $this->send($url, $jsonRequest);
+
+		if(!array_key_exists("cms", $result)) throw new WebSSLException('Missing Key in JSON Response.');
 		 
-		$cms = $jsonResult['cms'];
+		$cms = $result['cms'];
 
 		//Remove CMS Header
 		$cms = str_replace('-----BEGIN CMS-----', '', $cms);
