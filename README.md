@@ -10,11 +10,9 @@ Sample code demonstrating how to use the SecurePHPMailer class.
 
 ## WebSSL.class.php
 This class handles the composition and transfer of HTTP-JSON requests and responses to a remote HSM. 
-The remote HSM provides a HTTP API. 
-See: 
--[WebSSL.io](https://www.webssl.io)
+The remote HSM provides the WebSSL HTTP API. 
+- [WebSSL.io](https://www.webssl.io)
 This class requires PHP's Client URL Library.
-see:
 - [libcurl](https://www.php.net/manual/en/book.curl.php)
 
 ## create_pki.php
