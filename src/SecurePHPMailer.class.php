@@ -81,10 +81,8 @@ class SecurePHPMailer extends PHPMailer
 			"------$boundary--\r\n";
 	}
 
-	private function composeEncryptedEmail($recipientCertPath)
+	private function composeEncryptedEmail($recipientCertificate)
 	{
-		// Open PEM Certificate 
-		$recipientCertificate = file_get_contents($recipientCertPath, FILE_USE_INCLUDE_PATH);
 		
 		// Split original email 
 		$emailParts = explode("MIME-Version: 1.0\r\n", $this->getSentMimeMessage());
@@ -111,18 +109,18 @@ class SecurePHPMailer extends PHPMailer
 		$this->postSend();
 	}
 
-	public function sendEncryptedEmail($recipientCertPath)
+	public function sendEncryptedEmail($recipientCertificate)
 	{
 		$this->preSend();
-		$this->composeEncryptedEmail($recipientCertPath);
+		$this->composeEncryptedEmail($recipientCertificate);
 		$this->postSend();
 	}
 
-	public function sendSignedAndEncryptedEmail($recipientCertPath)
+	public function sendSignedAndEncryptedEmail($recipientCertificate)
 	{
 		$this->preSend();
 		$this->composeSignedEmail();
-		$this->composeEncryptedEmail($recipientCertPath);
+		$this->composeEncryptedEmail($recipientCertificate);
 		$this->postSend();
 	}
 }

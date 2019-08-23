@@ -7,7 +7,7 @@ class WebSSLException extends Exception { }
  
 class WebSSL {
 
-	public $debug = false;
+	public $debug = true;
 
 	private $hsmAddress = "https://c1.cloudhsms.com/"; 
 
@@ -316,6 +316,43 @@ class WebSSL {
 		//Remove CMS Footer
 		$cms = str_replace('-----END CMS-----', '', $cms);		
 		return  $cms;	
+	}
+
+	/**
+	 * reqGenerateKeyAndSignedCertificate
+	 *	
+	 * 
+	 * @param 
+	 * @param  
+	 * @return 
+	 */
+	public function reqGenerateKeyAndSignedCertificate(string $password, string $signersKey, string $signerCert,
+		string $days, array $subject, array $keyUsage, array $enhancedKeyUsage, array $basicConstraints) {
+		
+		//Set the URL.
+		$url = $this->hsmAddress . "/req/generateKeySignedCert";
+		 
+		//The JSON data.
+		$jsonRequest = array(
+			'password' => $password,
+			'signerCert' => $signerCert,
+			'inKey' => $signersKey,
+			'algorithm' => "aes-2048",
+			'days' => $days,
+			'digest' => "sha-256",
+			'subject' => $subject,
+			'keyUsage' => $keyUsage,
+			'enhancedKeyUsage' => $enhancedKeyUsage,
+			'basicConstraints' = $basicConstraints
+		);
+		 
+		$result = $this->send($url, $jsonRequest);
+
+		if(!array_key_exists("pkcs12", $result)) throw new WebSSLException('Missing Key in JSON Response.');
+		 
+		$cms = $result['pkcs12'];
+	
+		return  $result['pkcs12'];
 	}
 
 }
