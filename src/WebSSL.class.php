@@ -227,6 +227,7 @@ class WebSSL {
 		 
 		//The JSON data.
 		$jsonRequest = array(
+			'digest' => "sha-256",
 			'inKey' => $signersKey,
 			'signer' => $signerCert,
 			'in' => base64_encode($data)
@@ -261,6 +262,7 @@ class WebSSL {
 		 
 		//The JSON data.
 		$jsonRequest = array(
+			'algorithm' => "aes-128",
 			'recip' => $recipientCert,
 			'in' => base64_encode($data)
 		);
@@ -294,6 +296,8 @@ class WebSSL {
 		 
 		//The JSON data.
 		$jsonRequest = array(
+			'algorithm' => "aes-128",
+			'digest' => "sha-256",
 			'inKey' => $signersKey,
 			'signer' => $signerCert,
 			'recip' => $recipientCert,
