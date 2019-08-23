@@ -343,7 +343,7 @@ class WebSSL {
 			'subject' => $subject,
 			'keyUsage' => $keyUsage,
 			'enhancedKeyUsage' => $enhancedKeyUsage,
-			'basicConstraints' = $basicConstraints
+			'basicConstraints' => $basicConstraints
 		);
 		 
 		$result = $this->send($url, $jsonRequest);
