@@ -88,7 +88,7 @@ $caCert = file_get_contents($fileCaCert);
 $caKey = file_get_contents($fileCaKey);
 
 // Create User Key, Certificate and return P12 file. 
-$userP12 = $webSSL->reqGenerateKeyAndSignedCertificate($userP12Password, $caKey, $caCert,
+$userP12 = $webSSL->reqGenerateKeyAndSignedCertificate($userP12Password, $caCert, $caKey,
 		$userCertDays, $userDN, $userKeyUsage, $userEnhancedKeyUsage, $userBasicContraints);
 
 echo $userP12;

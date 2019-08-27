@@ -342,7 +342,7 @@ class WebSSL {
 			'password' => $password,
 			'signerCert' => $signerCert,
 			'inKey' => $signersKey,
-			'algorithm' => "aes-2048",
+			'algorithm' => "rsa-2048",
 			'days' => $days,
 			'digest' => "sha-256",
 			'subject' => $subject,
