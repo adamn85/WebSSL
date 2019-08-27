@@ -177,40 +177,7 @@ class WebSSL {
 
 	}
 	
-	/**
-	 * Generates a key pair within the HSM and self signed certificate.
-	 *
-	 * $algorithm -- Type: String Required: yes Description: Algorithms (rsa-2048, rsa-4096, ecc-p256, ecc-p521).
-	 * $certDays -- Type: String Required: yes Description: The number of days the certificate will be valid for.
-	 * $csrDigest -- Type: object Required: yes Description: CSR digest (sha-256)
-	 * $certSubjectType -- Type String Required: yes Description: Certificate subject type (CA, End Entity)
-	 * $dn -- Type: object Required: yes Description: CSR Distinguished names
-	 */
-	 
-	public function reqGenKeyCert($algorithm, $certDays, $csrDigest, $certSubjectType, $dn) {
-		
-		$url = $this->hsmAddress . "/req/generateKeyCert";
-		 
-		//The JSON data.
-		$jsonData = array(
-			'algorithm' => $algorithm,
-			'days' => $certDays,
-			'digest' => $csrDigest,
-			'subjectType' => $certSubjectType,
-			'distinguishedNames' => $dn
-		);
-		 
-		$result = $this->send($url, $jsonData);
 
-		if(!array_key_exists("privateKey", $result)) throw new WebSSLException('Missing Key in JSON Response.');
-		if(!array_key_exists("certificate", $result)) throw new WebSSLException('Missing Key in JSON Response.');
-		 
-		$privateKey = $result['privateKey'];
-		$certificate = $result['certificate'];
-		
-		return $result;
-
-	}
 	
 	/**
 	 * Signs data within a HSM as CMS signed-data content, using the signers encrypted private key and certificate.
@@ -319,6 +286,44 @@ class WebSSL {
 	}
 
 	/**
+	 * Generates a key pair within the HSM and self signed certificate.
+	 *
+	 * $algorithm -- Type: String Required: yes Description: Algorithms (rsa-2048, rsa-4096, ecc-p256, ecc-p521).
+	 * $certDays -- Type: String Required: yes Description: The number of days the certificate will be valid for.
+	 * $csrDigest -- Type: object Required: yes Description: CSR digest (sha-256)
+	 * $certSubjectType -- Type String Required: yes Description: Certificate subject type (CA, End Entity)
+	 * $dn -- Type: object Required: yes Description: CSR Distinguished names
+	 */
+	 
+	public function reqGenKeyCert(string $days, array $subject, array $keyUsage, array $enhancedKeyUsage, array $basicConstraints) {
+		
+		$url = $this->hsmAddress . "/req/generateKeyCert";
+		 
+		//The JSON data.
+		$jsonData = array(
+			'algorithm' => "rsa-2048",
+			'days' => $days,
+			'digest' => "sha-256",
+			'subject' => $subject,
+			'keyUsage' => $keyUsage,
+			'enhancedKeyUsage' => $enhancedKeyUsage,
+			'basicConstraints' => $basicConstraints
+		);
+		 
+		$result = $this->send($url, $jsonData);
+
+		if(!array_key_exists("privateKey", $result)) throw new WebSSLException('Missing Key in JSON Response.');
+		if(!array_key_exists("certificate", $result)) throw new WebSSLException('Missing Key in JSON Response.');
+		 
+		$privateKey = $result['privateKey'];
+		$certificate = $result['certificate'];
+		
+		return $result;
+
+	}
+
+
+	/**
 	 * reqGenerateKeyAndSignedCertificate
 	 *	
 	 * 
@@ -350,8 +355,6 @@ class WebSSL {
 
 		if(!array_key_exists("pkcs12", $result)) throw new WebSSLException('Missing Key in JSON Response.');
 		 
-		$cms = $result['pkcs12'];
-	
 		return  $result['pkcs12'];
 	}
 
