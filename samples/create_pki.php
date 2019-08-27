@@ -50,15 +50,6 @@ $userDN = $caDN;
 $userDN['commonName'] = 'User';
 $userDN['email'] = 'user@demo.com';
 
-
-$userKeyUsage = array (
-	"dataEncipherment",
-	"digitalSignature",
-	"keyAgreement",
-	"keyEncipherment",
-	"nonRepudiation"
-);
-
 $userEnhancedKeyUsage = array (
 	"clientAuthentication",
 	"emailProtection"
@@ -67,6 +58,40 @@ $userEnhancedKeyUsage = array (
 $userBasicContraints = array (
 	"subjectType" => "End Entity"
 );
+
+// Using the values set in enchanced key usage determine what should be set in the standard key usage 
+function determineKeyUsage(array $enhancedKeyUsage) {
+	$keyUsage = array();
+
+	if(in_array('clientAuthentication', $enhancedKeyUsage)) {
+		array_push($keyUsage, "digitalSignature");
+		array_push($keyUsage, "keyEncipherment");
+		array_push($keyUsage, "keyAgreement");
+	}
+
+	if(in_array('serverAuthentication', $enhancedKeyUsage)) {
+		array_push($keyUsage, "digitalSignature");
+		array_push($keyUsage, "keyAgreement");
+	}
+
+	if(in_array("emailProtection", $enhancedKeyUsage)) {
+		array_push($keyUsage, "digitalSignature");
+		array_push($keyUsage, "nonRepudiation");
+		array_push($keyUsage, "keyEncipherment");
+		array_push($keyUsage, "keyAgreement");
+	}
+
+	if(in_array("timeStamping", $enhancedKeyUsage)) {
+		array_push($keyUsage, "digitalSignature");
+		array_push($keyUsage, "nonRepudiation");
+	}
+
+	if(in_array("codeSigning", $enhancedKeyUsage)) {
+		array_push($keyUsage, "digitalSignature");
+	}
+
+	return array_values(array_unique($keyUsage));
+}
 
 
 // Check if CA certificate and key exist.
@@ -89,7 +114,7 @@ $caKey = file_get_contents($fileCaKey);
 
 // Create User Key, Certificate and return P12 file. 
 $userP12 = $webSSL->reqGenerateKeyAndSignedCertificate($userP12Password, $caCert, $caKey,
-		$userCertDays, $userDN, $userKeyUsage, $userEnhancedKeyUsage, $userBasicContraints);
+		$userCertDays, $userDN, determineKeyUsage($userEnhancedKeyUsage), $userEnhancedKeyUsage, $userBasicContraints);
 
 header('Content-Type: application/x-pkcs12');
 header('Content-Disposition: attachment; filename="user.p12"');
