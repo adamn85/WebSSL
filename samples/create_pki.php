@@ -91,6 +91,8 @@ $caKey = file_get_contents($fileCaKey);
 $userP12 = $webSSL->reqGenerateKeyAndSignedCertificate($userP12Password, $caCert, $caKey,
 		$userCertDays, $userDN, $userKeyUsage, $userEnhancedKeyUsage, $userBasicContraints);
 
-echo $userP12;
+header('Content-Type: application/x-pkcs12');
+header('Content-Disposition: attachment; filename="user.p12"');
+echo base64_decode($userP12);
 
 ?>
