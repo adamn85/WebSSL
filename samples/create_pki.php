@@ -59,47 +59,13 @@ $userBasicContraints = array (
 	"subjectType" => "End Entity"
 );
 
-// Using the values set in enchanced key usage determine what should be set in the standard key usage 
-function determineKeyUsage(array $enhancedKeyUsage) {
-	$keyUsage = array();
-
-	if(in_array('clientAuthentication', $enhancedKeyUsage)) {
-		array_push($keyUsage, "digitalSignature");
-		array_push($keyUsage, "keyEncipherment");
-		array_push($keyUsage, "keyAgreement");
-	}
-
-	if(in_array('serverAuthentication', $enhancedKeyUsage)) {
-		array_push($keyUsage, "digitalSignature");
-		array_push($keyUsage, "keyAgreement");
-	}
-
-	if(in_array("emailProtection", $enhancedKeyUsage)) {
-		array_push($keyUsage, "digitalSignature");
-		array_push($keyUsage, "nonRepudiation");
-		array_push($keyUsage, "keyEncipherment");
-		array_push($keyUsage, "keyAgreement");
-	}
-
-	if(in_array("timeStamping", $enhancedKeyUsage)) {
-		array_push($keyUsage, "digitalSignature");
-		array_push($keyUsage, "nonRepudiation");
-	}
-
-	if(in_array("codeSigning", $enhancedKeyUsage)) {
-		array_push($keyUsage, "digitalSignature");
-	}
-
-	return array_values(array_unique($keyUsage));
-}
-
 
 // Check if CA certificate and key exist.
 if(!file_exists($fileCaCert ) || !file_exists($fileCaKey)) {
 	error_log("Unable to find either CA Certificate or CA key files.");
 
 	// Generate Key and Self Signed Certificate and key
- 	$caKeyAndCert = $webSSL->reqGenKeyCert('365', $caDN, $caKeyUsage, $caEnhancedKeyUsage, $caBasicContraints);
+ 	$caKeyAndCert = $webSSL->reqGenKeyCert("rsa-2048", "365", $caDN, $caKeyUsage, $caEnhancedKeyUsage, $caBasicContraints);
 
  	$caKeyAndCert['privateKey'];
  	$caKeyAndCert['certificate'];
@@ -113,8 +79,8 @@ $caCert = file_get_contents($fileCaCert);
 $caKey = file_get_contents($fileCaKey);
 
 // Create User Key, Certificate and return P12 file. 
-$userP12 = $webSSL->reqGenerateKeyAndSignedCertificate($userP12Password, $caCert, $caKey,
-		$userCertDays, $userDN, determineKeyUsage($userEnhancedKeyUsage), $userEnhancedKeyUsage, $userBasicContraints);
+$userP12 = $webSSL->reqGenerateKeyAndSignedCertificate($userP12Password, "rsa-2048", $caCert, $caKey,
+		$userCertDays, $userDN, WebSSL::determineKeyUsage($userEnhancedKeyUsage), $userEnhancedKeyUsage, $userBasicContraints);
 
 header('Content-Type: application/x-pkcs12');
 header('Content-Disposition: attachment; filename="user.p12"');

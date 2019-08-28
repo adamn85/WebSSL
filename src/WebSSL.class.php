@@ -9,11 +9,17 @@ class WebSSL {
 
 	public $debug = true;
 
-	private $hsmAddress = "https://c1.cloudhsms.com/"; 
+	private $hsmAddress; 
 
-	public function __construct($hsmAddress) {
-		if (!filter_var($hsmAddress, FILTER_VALIDATE_URL)) throw new WebSSLException('Invalid HSM Address: ' . $hsmAddress);
-		$this->hsmAddress = $hsmAddress;
+	public function __construct(string $hsmAddress) {
+		if(!empty($hsmAddress)) {
+			$hsmAddress = rtrim($hsmAddress,"/");
+			if (!filter_var($hsmAddress, FILTER_VALIDATE_URL)) throw new WebSSLException('Invalid HSM Address: ' . $hsmAddress);
+			$this->hsmAddress = $hsmAddress;
+		} else { 
+			// Set to default address
+			$this->hsmAddress = "https://c1.cloudhsms.com";
+		}
 	}
 	
 	/**
@@ -295,13 +301,13 @@ class WebSSL {
 	 * $dn -- Type: object Required: yes Description: CSR Distinguished names
 	 */
 	 
-	public function reqGenKeyCert(string $days, array $subject, array $keyUsage, array $enhancedKeyUsage, array $basicConstraints) {
+	public function reqGenKeyCert(string $algorithm, string $days, array $subject, array $keyUsage, array $enhancedKeyUsage, array $basicConstraints) {
 		
 		$url = $this->hsmAddress . "/req/generateKeyCert";
 		 
 		//The JSON data.
 		$jsonData = array(
-			'algorithm' => "rsa-2048",
+			'algorithm' => $algorithm,
 			'days' => $days,
 			'digest' => "sha-256",
 			'subject' => $subject,
@@ -331,7 +337,7 @@ class WebSSL {
 	 * @param  
 	 * @return 
 	 */
-	public function reqGenerateKeyAndSignedCertificate(string $password, string $signersKey, string $signerCert,
+	public function reqGenerateKeyAndSignedCertificate(string $password, string $algorithm, string $signersKey, string $signerCert,
 		string $days, array $subject, array $keyUsage, array $enhancedKeyUsage, array $basicConstraints) {
 		
 		//Set the URL.
@@ -342,7 +348,7 @@ class WebSSL {
 			'password' => $password,
 			'signerCert' => $signerCert,
 			'inKey' => $signersKey,
-			'algorithm' => "rsa-2048",
+			'algorithm' => $algorithm,
 			'days' => $days,
 			'digest' => "sha-256",
 			'subject' => $subject,
@@ -356,6 +362,40 @@ class WebSSL {
 		if(!array_key_exists("pkcs12", $result)) throw new WebSSLException('Missing Key in JSON Response.');
 		 
 		return  $result['pkcs12'];
+	}
+
+	// Using the values set in enchanced key usage determine what should be set in the standard key usage
+	public static function determineKeyUsage(array $enhancedKeyUsage) {
+		$keyUsage = array();
+
+		if(in_array('clientAuthentication', $enhancedKeyUsage)) {
+			array_push($keyUsage, "digitalSignature");
+			array_push($keyUsage, "keyEncipherment");
+			array_push($keyUsage, "keyAgreement");
+		}
+
+		if(in_array('serverAuthentication', $enhancedKeyUsage)) {
+			array_push($keyUsage, "digitalSignature");
+			array_push($keyUsage, "keyAgreement");
+		}
+
+		if(in_array("emailProtection", $enhancedKeyUsage)) {
+			array_push($keyUsage, "digitalSignature");
+			array_push($keyUsage, "nonRepudiation");
+			array_push($keyUsage, "keyEncipherment");
+			array_push($keyUsage, "keyAgreement");
+		}
+
+		if(in_array("timeStamping", $enhancedKeyUsage)) {
+			array_push($keyUsage, "digitalSignature");
+			array_push($keyUsage, "nonRepudiation");
+		}
+
+		if(in_array("codeSigning", $enhancedKeyUsage)) {
+			array_push($keyUsage, "digitalSignature");
+		}
+
+		return array_values(array_unique($keyUsage));
 	}
 
 }
