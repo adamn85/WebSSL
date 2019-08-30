@@ -6,6 +6,7 @@ class CSRException extends Exception { }
  
 class CSR {
 
+	public $version;
 	public $subject;
 	public $publicKeyInfo;
 	public $keyUsage;
@@ -20,8 +21,11 @@ class CSR {
 		$subject_cn = $subject_c = $subject_l = $subject_s = $subject_o = $subject_ou = $subject_e = $subject_dc = null; 
 		$dns = $ip = "Not Present";
 
+		if(!array_key_exists("version", $csrArray)) 	  throw new CSRException('Version not present');
 		if(!array_key_exists("subject", $csrArray)) 	  throw new CSRException('Subject not present');
 		if(!array_key_exists("publicKeyInfo", $csrArray)) throw new CSRException('Public Key Info not present');
+		
+		$this->version = $csrArray['version'];
 		
 		if(!array_key_exists("commonName",		  $csrArray['subject'])) throw new CSRException('Common Name not present');
 		if(array_key_exists("commonName",  		  $csrArray['subject'])) $subject_cn = $csrArray['subject']['commonName'];
@@ -68,7 +72,8 @@ class CSR {
 	function toString(){
 		
 		$keyUsage = $extendedKeyUsage = $subjectKeyId = $basicConstraints = $subjectAltName = $signature = "";
-		
+			
+		$version = "\n\tVersion: \n\t\t" . $this->version;
 		$subject = "\n\tSubject: ";
 		$subject .= "\n\t\tCommon Name: " . $this->subject->cn;	
 		if($this->subject->l != null)  $subject .= "\n\t\tLocality: " . $this->subject->l;
@@ -112,7 +117,7 @@ class CSR {
 			$signature .= "\n\t\tValue: " . $this->signature->value;
 		}
 		
-		return "Certificate Signing Request:\n" . $subject. $publicKeyInfo . $keyUsage . $extendedKeyUsage . $subjectKeyId . $basicConstraints . $subjectAltName . $signature;
+		return "Certificate Signing Request:\n" . $version . $subject. $publicKeyInfo . $keyUsage . $extendedKeyUsage . $subjectKeyId . $basicConstraints . $subjectAltName . $signature;
 	}
 }
 
