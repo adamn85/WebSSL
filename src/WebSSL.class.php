@@ -363,6 +363,46 @@ class WebSSL {
 		 
 		return  $result['pkcs12'];
 	}
+	
+	/**
+	 * reqDecodeCSR
+	 *	
+	 * $csr a PEM encoded certificate signing request
+	 */
+	public function reqDecodeCSR(string $csr){
+		
+		//Set the URL.
+		$url = $this->hsmAddress . "/req/decodeCsr";
+		
+		//The JSON data.
+		$jsonRequest = array(
+			'csr' => $csr
+		);
+		
+		$result = $this->send($url, $jsonRequest);
+		
+		return $result;
+	}
+	
+	/**
+	 * x509DecodeCertificate
+	 *	
+	 * $certificate a PEM encoded certificate 
+	 */
+	public function x509DecodeCertificate(string $certificate){
+		
+		//Set the URL.
+		$url = $this->hsmAddress . "/x509/decodeCert";
+		
+		//The JSON data.
+		$jsonRequest = array(
+			'certificate' => $certificate,
+		);
+		
+		$result = $this->send($url, $jsonRequest);
+		
+		return $result;
+	}
 
 	// Using the values set in enchanced key usage determine what should be set in the standard key usage
 	public static function determineKeyUsage(array $enhancedKeyUsage) {
