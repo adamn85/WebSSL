@@ -35,7 +35,7 @@ class WebSSL {
 		if(!empty($jsonData)) {
 			//Encode the array into JSON.
 			$jsonDataEncoded = json_encode($jsonData, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_LINE_TERMINATORS);
-			$jsonDataEncoded = str_replace(array("\\n", "\\r\n"), "\n", $jsonDataEncoded);
+			$jsonDataEncoded = str_replace(array("\\\n", "\\n", "\\r\n"), "\n", $jsonDataEncoded);
 
 			if($this->debug) error_log("Debug: JSON Request: " . $jsonDataEncoded);
 			 
