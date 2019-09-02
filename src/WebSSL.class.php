@@ -67,12 +67,14 @@ class WebSSL {
 		//Execute the request
 		$response 	= curl_exec($ch);
 		$err 		= curl_error($ch);
-		if($err) throw new WebSSLException('Curl Error: ' . $err);
-		if(!$response) throw new WebSSLException('Empty Response.');
+		if($err) throw new WebSSLException('Curl Error: ' . $err);	
 
 		//Get last HTTP status code
 		$http_code = curl_getinfo( $ch, CURLINFO_HTTP_CODE );
 		if($http_code != "200" ) throw new WebSSLException('HTTP Response: ' . $http_code);
+
+		// Check body has something in it
+		if(!$response) throw new WebSSLException('Empty Response.');
 		
 		// Close channel
 		curl_close($ch);
