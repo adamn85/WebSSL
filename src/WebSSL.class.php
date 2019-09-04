@@ -96,6 +96,20 @@ class WebSSL {
 		
 		return $result;
 	}
+
+	public function getHsmStatus() {
+
+		$url = $this->hsmAddress . "/hsm/status";
+
+		$result = $this->send($url, array());
+
+		if(!array_key_exists("temperature", $result)) throw new WebSSLException('Missing Key in JSON Response.');
+		if(!array_key_exists("batteryVoltage", $result)) throw new WebSSLException('Missing Key in JSON Response.');
+		if(!array_key_exists("freeMemory", $result)) throw new WebSSLException('Missing Key in JSON Response.');
+		if(!array_key_exists("usedMemory", $result)) throw new WebSSLException('Missing Key in JSON Response.');
+		
+		return $result;
+	}
 	
 	 /**
 	 * Generates a cryptographic key pair inside a HSM. The private key is AES encrypted by a HSM and returned in a 
